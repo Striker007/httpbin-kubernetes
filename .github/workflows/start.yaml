@@ -1,14 +1,19 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 ---
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is testing helm 🚀
 on:
   push:
     branches: [ "main", "develop_ci" ]
+
 jobs:
 
   lint:
     name: Helm Lint & Template
     runs-on: ubuntu-latest
+    env:
+      HELM_CHART: charts/httpbin
+      HELM_RELEASE: httpbin
     steps:
       - uses: actions/checkout@v4
 
