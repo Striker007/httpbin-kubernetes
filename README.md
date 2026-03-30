@@ -7,6 +7,9 @@ The service provides a variety of endpoints that return different types of data,
 This repo contains minimal and clean solution of Kubernetes deployment for `kennethreitz/httpbin` image,
 and `mccutchen/go-httpbin` (it's modern counterpart - more secure, lightwaight)
 
+
+[![GitHub Actions Demo](https://github.com/Striker007/httpbin-kubernetes/actions/workflows/start.yaml/badge.svg?branch=develop_ci)](https://github.com/Striker007/httpbin-kubernetes/actions/workflows/start.yaml)
+
 ## Table of Contents
 - [Goal](#goal)
 - [Architecture](#architecture)
