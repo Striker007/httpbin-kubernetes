@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+---
+name: GitHub Actions Helm
+run-name: ${{ github.actor }} is testing helm 🚀
+on:
+  push:
+    branches: [ "main", "develop_ci" ]
+    paths-ignore:
+      - 'iac/**'
+      - '**.md'
+      - 'Makefile'
+
+jobs:
+
+  lint:
+    name: Helm Lint & Template
+    runs-on: ubuntu-latest
+    env:
+      HELM_CHART: charts/httpbin
+      HELM_RELEASE: httpbin
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Helm
+        run: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+      - name: helm lint (default)
+        run: helm lint ${{ env.HELM_CHART }}
+
+      - name: helm lint (httpbin values)
+        run: helm lint ${{ env.HELM_CHART }} -f helm_values_prod_httpbin.yaml
+
+      - name: helm lint (go-httpbin values)
+        run: helm lint ${{ env.HELM_CHART }} -f helm_values_prod_go-httpbin.yaml
+
+      - name: helm template (test render)
+        run: |
+          helm template ${{ env.HELM_RELEASE }} ${{ env.HELM_CHART }} \
+            -f helm_values_prod_httpbin.yaml    > /tmp/rendered-httpbin.yaml
+          helm template ${{ env.HELM_RELEASE }} ${{ env.HELM_CHART }} \
+            -f helm_values_prod_go-httpbin.yaml > /tmp/rendered-go-httpbin.yaml
