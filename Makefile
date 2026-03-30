@@ -82,7 +82,12 @@ port-forward-8080-start: ## Port-forward httpbin to localhost:8080
 
 .PHONY: port-forward-8080-stop
 port-forward-8080-stop: ## Port-forward httpbin to localhost:8080
-	pkill -f "port-forward svc/httpbin" 
+	pkill -f "port-forward svc/httpbin"
+
+.PHONY: cluster-debug-pod
+cluster-debug-pod:
+	@echo "WARNGING creating debug pod in your cluster"
+	@kubectl --context $(CONTEXT) -n $(NAMESPACE) run debug --rm -it --restart=Never --image=ubuntu:24.04 bash
 
 .PHONY: curl
 curl: ## Quick curl check via httpbin.local (no ingress so )
@@ -91,8 +96,9 @@ curl: ## Quick curl check via httpbin.local (no ingress so )
 
 ##@ Monitoring
 
-# .PHONY: sla
-# sla: ## Deploy SLA monitor
+.PHONY: deploy-sla
+deploy-sla:
+	@echo "in development ..."
 # 	@echo "\n reading metrics from ingress (traefik)"
 # 	kubectl delete pod sla-monitor -n $(NAMESPACE) --context $(CONTEXT) || true
 # 	kubectl apply -k iac/monitoring_sla/ --context $(CONTEXT)  && \
