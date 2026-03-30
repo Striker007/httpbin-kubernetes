@@ -156,3 +156,11 @@ httpbin-6b546d6876-rnbwl   1/1     Running   0          31s   10.42.4.3   k3d-de
 [up](#table-of-contents)
 
 #### [>> DEVELOPMENT details](DEVELOPMENT.md)
+
+
+## License
+
+© 2025 Striker007 (https://github.com/Striker007). All rights reserved.
+
+You may use this project as-is for personal or professional purposes.
+Modification, redistribution, and forking are not permitted without explicit written permission from the author.
