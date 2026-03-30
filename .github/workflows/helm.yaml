@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 ---
-name: GitHub Actions Demo
+name: GitHub Actions Helm
 run-name: ${{ github.actor }} is testing helm 🚀
 on:
   push:

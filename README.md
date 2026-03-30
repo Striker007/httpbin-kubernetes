@@ -8,7 +8,7 @@ This repo contains minimal and clean solution of Kubernetes deployment for `kenn
 and `mccutchen/go-httpbin` (it's modern counterpart - more secure, lightwaight)
 
 
-[![GitHub Actions Demo](https://github.com/Striker007/httpbin-kubernetes/actions/workflows/start.yaml/badge.svg?branch=develop_ci)](https://github.com/Striker007/httpbin-kubernetes/actions/workflows/start.yaml)
+[![GitHub Actions Demo](https://github.com/Striker007/httpbin-kubernetes/actions/workflows/helm.yaml/badge.svg?branch=main)](https://github.com/Striker007/httpbin-kubernetes/actions/workflows/helm.yaml)
 
 ## Table of Contents
 - [Goal](#goal)
