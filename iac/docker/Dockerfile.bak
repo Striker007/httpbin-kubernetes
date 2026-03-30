@@ -1,0 +1,78 @@
+#################################################
+# SOURCE
+#
+FROM kennethreitz/httpbin:latest AS source
+# RUN cat httpbin/README.md 
+
+
+#################################################
+# BUILD
+#
+FROM python:3.6-slim AS builder
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+
+WORKDIR /build
+# RUN apt-get update -y && apt-get install -y build-essential libffi-dev && rm -rf /var/lib/apt/lists/*
+
+# there is dependency issues (outdated, not secure, installation may be problematic + not related to initial task)
+# we can extract code and dependencies from original image
+# COPY --from=source /httpbin /build/
+# OR
+# to extract only dependencies
+COPY --from=source  /usr/local/lib/python3.6/dist-packages /usr/local/lib/python3.6/dist-packages
+COPY --from=source /usr/local/bin/gunicorn /usr/local/bin/gunicorn
+COPY --from=source /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
+# and use github repo kennethreitz/httpbin (master branch, the same codebase)
+# COPY ./httpbin /build/
+
+# install httpbin itself
+# RUN pip3 install --no-cache-dir .
+
+
+#################################################
+# RUNTIME
+#
+# smaller, a bit safer (footprint) image
+FROM python:3.6-slim AS runtime
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+ENV PYTHONIOENCODING=utf-8
+ENV GUNICORN_CMD_ARGS="--access-logfile - --error-logfile -"
+
+RUN  mkdir -p /usr/lib/python3/site-packages/
+
+# COPY --from=builder /usr/local/lib/python3.6/site-packages /usr/local/lib/python3.6/site-packages
+# COPY --from=builder /usr/local/lib/python3.6/dist-packages/gunicorn  /usr/local/lib/python3.6/site-packages/gunicorn
+COPY --from=builder /usr/local/lib/python3.6/dist-packages  /usr/local/lib/python3.6/dist-packages
+COPY --from=builder /usr/local/bin/gunicorn /usr/local/bin/gunicorn
+COPY --from=builder /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
+
+RUN ln -s /usr/local/bin/python /usr/bin/python3;
+    # ln -s /usr/local/lib/python3.6/dist-packages /usr/local/lib/python3.6/site-packages; \
+# RUN ln -s /usr/lib/python3/dist-packages /usr/lib/python3/site-packages;
+    # ln -s /usr/local/lib/python3.6/dist-packages/gunicorn /usr/local/lib/python3.6/site-packages/gunicorn; \
+    # ln -s /usr/lib/python3/dist-packages/gevent  /usr/local/lib/python3.6/dist-packages/gevent
+RUN  cp -r /usr/local/lib/python3.6/dist-packages/* /usr/local/lib/python3.6/site-packages/
+RUN  mkdir -p /usr/local/lib/python3/site-packages/ ; \
+    cp -r /usr/lib/python3/dist-packages/* /usr/local/lib/python3/site-packages/
+
+# ADD httpbin.bash /opt/httpbin/bin
+# RUN chmod +x /opt/httpbin/bin/httpbin.bash
+# RUN chown --recursive httpbin /opt/httpbin
+# RUN addgroup -S app -g 1001 && adduser -S app -G app -u 1001
+
+RUN groupadd --gid 1000 app && \
+    useradd --uid 1000 --gid app --no-create-home app
+
+USER app
+
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD python -c "import urllib.request; urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8080/status/200', headers={'X-Health-Check': 'true'}), timeout=3)" || exit 1
+
+# ENTRYPOINT ["/usr/local/bin/python"]
+# CMD ["-m", "httpbin.core", "--port", "8080", "--host", "0.0.0.0"]
+
+CMD ["gunicorn", "-b", "0.0.0.0:8080", "httpbin:app", "-k", "gevent"]
+# gunicorn -b 0.0.0.0:8080 httpbin:app -k gevent

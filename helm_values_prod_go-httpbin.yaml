@@ -1,0 +1,109 @@
+
+image:
+  # repository: kennethreitz/httpbin
+  repository: mccutchen/go-httpbin
+  pullPolicy: IfNotPresent
+  tag: "2.21"
+
+networkPolicy:
+  enabled: true
+
+containerPort: 8080
+service:
+  type: ClusterIP
+  port: 80
+
+replicaCount: 3
+revisionHistoryLimit: 5
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 25%
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+
+pdb:
+  enabled: true
+  minAvailable: 1
+  # maxUnavailable: 1
+
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop: ["ALL"]
+    add: []
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  # 65532 id in docker image
+  runAsUser: 65532
+  # runAsGroup: 65532 
+  seccompProfile:
+    type: RuntimeDefault
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 128Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+
+startupProbe:
+  httpGet:
+    path: /get
+    port: http
+  periodSeconds: 5
+  # initialDelaySeconds: 2
+  failureThreshold: 15
+livenessProbe:
+  httpGet:
+    path: /get
+    port: http
+  # initialDelaySeconds: 1
+  periodSeconds: 20
+  failureThreshold: 3
+  timeoutSeconds: 2
+readinessProbe:
+  httpGet:
+    path: /get
+    port: http
+  initialDelaySeconds: 3
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 2
+
+# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+lifecycle:
+  preStop:
+    exec:
+      command: ["sleep", "10"]
+
+terminationGracePeriodSeconds: 30
+
+volumes: []
+  # - name: tmp
+  #   emptyDir:
+  #     medium: Memory
+  #     sizeLimit: 10Mi
+
+volumeMounts: []
+  # - name: tmp
+  #   mountPath: /tmp

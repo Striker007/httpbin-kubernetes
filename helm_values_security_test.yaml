@@ -1,0 +1,118 @@
+
+
+image:
+  repository: ubuntu
+  pullPolicy: IfNotPresent
+  # WARNGING - there is no other version
+  # imgae is not updated for 7+ years
+  tag: "24.04"
+
+command:
+  - "sleep"
+  - "infinity"
+
+
+networkPolicy:
+  enabled: false
+
+replicaCount: 1
+revisionHistoryLimit: 1
+
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 0
+    maxSurge: 25%
+
+topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+
+
+env:
+  - name: APP_VERSION
+    value: "final"
+  - name: GUNICORN_CMD_ARGS
+    value: "--access-logfile - --error-logfile -"
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop: ["ALL"]
+    add: ["SETUID", "SETGID", "CHOWN", "FOWNER", "DAC_OVERRIDE"]
+  allowPrivilegeEscalation: true
+  readOnlyRootFilesystem: false 
+  runAsNonRoot: false
+  runAsUser: 0
+  runAsGroup: 0
+  seccompProfile:
+    type: Unconfined
+
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 128Mi
+  requests:
+    cpu: 200m
+    memory: 128Mi
+
+startupProbe: {}
+#   httpGet:
+#     path: /get
+#     port: http
+#   periodSeconds: 5
+#   # initialDelaySeconds: 2
+#   failureThreshold: 15
+livenessProbe:
+  exec:
+    command:
+    - /bin/sh
+    - -c
+    - "exit 0"
+  # httpGet:
+  #   path: /get
+  #   port: http
+  # initialDelaySeconds: 5
+  # periodSeconds: 30
+  # timeoutSeconds: 5
+  # failureThreshold: 3
+readinessProbe: {}
+#   httpGet:
+#     path: /get
+#     port: http
+#   initialDelaySeconds: 3
+#   periodSeconds: 10
+#   failureThreshold: 3
+#   timeoutSeconds: 2
+
+# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+lifecycle: {}
+  # preStop:
+  #   exec:
+  #     command: ["sleep", "1"]
+
+terminationGracePeriodSeconds: 2
+
+# volumes:
+#   - name: tmp
+#     emptyDir:
+#       medium: Memory
+#       sizeLimit: 10Mi
+
+# volumeMounts:
+#   - name: tmp
+#     mountPath: /tmp

@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: httpbin-smoke
+  namespace: httpbin-production
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: k6
+          image: grafana/k6:0.55.0
+          command: ["k6", "run", "/scripts/smoke.js"]
+          env:
+            - name: BASE_URL
+              value: "http://httpbin.httpbin-production"
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+          resources:
+            limits:
+              cpu: 200m
+              memory: 64Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+      volumes:
+        - name: scripts
+          configMap:
+            name: httpbin-smoke

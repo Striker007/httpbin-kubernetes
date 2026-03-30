@@ -1,0 +1,27 @@
+# k3d-config.yaml
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: dev
+servers: 1
+agents: 3
+ports:
+  - port: 80:80
+    nodeFilters: [loadbalancer]
+  # - port: 443:443
+  #   nodeFilters: [loadbalancer]
+registries:
+  create:
+    name: dev-registry
+    host: "0.0.0.0"
+    hostPort: "5111"
+# options:
+  # k3s:
+    # extraArgs:
+      # - arg: --disable=traefik
+        # nodeFilters: [server:*]
+
+
+# Ingress Nginx
+# helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+# helm install ingress-nginx ingress-nginx/ingress-nginx \
