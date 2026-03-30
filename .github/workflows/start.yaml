@@ -5,6 +5,10 @@ run-name: ${{ github.actor }} is testing helm 🚀
 on:
   push:
     branches: [ "main", "develop_ci" ]
+    paths-ignore:
+      - 'iac/**'
+      - '**.md'
+      - 'Makefile'
 
 jobs:
 
